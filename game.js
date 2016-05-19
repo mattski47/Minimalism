@@ -58,6 +58,7 @@ var coins = new PIXI.Container();
 stage.addChild(coins);
 
 //set interval for when each coin drops
+//a new coin is added every 5 seconds till max at 5
 function initialDrop() {
 	setTimeout(dropCoin, 0, coin1);
 	setTimeout(dropCoin, 5000, coin2);
@@ -66,7 +67,7 @@ function initialDrop() {
 	setTimeout(dropCoin, 20000, coin5);
 }
 
-//set starting position for coin before dropping
+//set starting x position for coin before dropping
 function dropCoin(coin) {
 	var xPos = Math.floor(Math.random()*(renderer.width-20));
 	coin.position.x = xPos;
@@ -76,7 +77,7 @@ function dropCoin(coin) {
 
 //check coin's state
 function catchCoin(coin) {
-	//checks that the coin was added to container
+	//checks that the coin was added to container (initially dropped)
 	if (coin.parent) {
 		//checks if coin is near player
 		if (coin.position.x >= playerSprite.position.x-30 && coin.position.x <= playerSprite.position.x+30 && coin.position.y >= playerSprite.position.y-15 && coin.position.y <= playerSprite.position.y+30) {
@@ -98,7 +99,7 @@ function catchCoin(coin) {
 	}
 }
 
-//displays game over message and removes other objects
+//displays gameover message and removes other objects
 function endGame () {
 	gameOver.position.x = renderer.width/2;
 	gameOver.position.y = renderer.height/2 - 15;
@@ -115,8 +116,50 @@ function endGame () {
 	stage.removeChild(currentMisses);
 }
 
+//set while key is down, unset when key is released
+var left = false;
+var right = false;
+
+//move character while key is down
+function move() {
+	if (left) {
+		if (playerSprite.position.x >= 10) {
+			playerSprite.position.x -= 3;
+		}
+	}
+	
+	if (right) {
+		if (playerSprite.position.x <= renderer.width-10) {
+			playerSprite.position.x += 3;
+		}
+	}
+}
+
+//set direction to true when key is down
+function keydownEventHandler(e) {
+	if (e.keyCode == 37) { //move left
+		left = true;
+	}
+
+	if (e.keyCode == 39) { //move right
+		right = true;
+	}
+}
+
+//set direction to false when key is up
+function keyupEventHandler(e) {
+	if (e.keyCode == 37) {
+		left = false;
+	}
+	
+	if (e.keyCode == 39) {
+		right = false;
+	}
+}
+
 function animate() {
 	requestAnimationFrame(animate);
+	move();
 	
 	if (misses < 5) {
 		catchCoin(coin1);
@@ -131,22 +174,8 @@ function animate() {
 	renderer.render(stage);
 }
 
-//handle user input to move player
-function keydownEventHandler(e) {
-	if (e.keyCode == 37) { //move left
-		if (playerSprite.position.x != 10) {
-			playerSprite.position.x -= 10;
-		}
-	}
-
-	if (e.keyCode == 39) { //move right
-		if (playerSprite.position.x != renderer.width-10) {
-			playerSprite.position.x += 10;
-		}
-	}
-}
-
 initialDrop();
 animate();
 
 document.addEventListener('keydown', keydownEventHandler);
+document.addEventListener('keyup', keyupEventHandler);
